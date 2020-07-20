@@ -21,7 +21,7 @@ WiFiClient wifiClient;
   void MQTT::setup() {
     this->client.setServer(MQTT_HOST, MQTT_PORT);
     this->client.setCallback([this](char * topic, unsigned char* payload, unsigned int length){
-      Serial.println("-------aaanew message from broker-----");
+      Serial.println("-------new message from broker-----");
       Serial.print("channel:");
       Serial.println(topic);
       Serial.print("data:");  

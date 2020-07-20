@@ -7,9 +7,9 @@
 
 extern elektronvolt::MQTT *mqtt;
 
-// PMS_READ_INTERVAL (4:30 min) and PMS_READ_DELAY (30 sec) CAN'T BE EQUAL! Values are also used to detect sensor state.
-static const uint32_t PMS_READ_INTERVAL = 60000;
-static const uint32_t PMS_READ_DELAY = 30000;
+// Get a data every 2 minutes.
+static const uint32_t PMS_READ_INTERVAL = 90000; // sleep 90 secs (1.30m)
+static const uint32_t PMS_READ_DELAY = 30000; // wakeup for 30 and then read.
 
 uint32_t timerInterval = PMS_READ_DELAY;
 
@@ -52,12 +52,6 @@ void PM25Sensor::read() {
     pms.requestRead();
 
     if (pms.readUntil(data)) {
-      // messageString = String(data.PM_AE_UG_1_0);
-      // messageString.toCharArray(mqttMessageBuffer, messageString.length() + 1);
-      // Serial.print(mqttMessageBuffer);
-      // Serial.println
-      // mqtt->writeToTopic("pmsensor/pm_1_0", "ciao");
-
 
       sprintf(mqttMessageBuffer, "%d", data.PM_AE_UG_1_0);
       mqtt->writeToTopic("pmsensor/pm_1_0", mqttMessageBuffer);
