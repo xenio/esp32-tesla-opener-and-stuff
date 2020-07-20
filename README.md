@@ -9,6 +9,8 @@ Heyyo! This repository contains some stuff:
 
 ## Products used:
 
+Of course an [ESP32](https://amzn.to/2WCQVBx)
+
 ### for Tesla Door Opener
  - [433MHz transmitter](https://www.amazon.it/gp/product/B00R2U8OEU) for Tesla Charge Door Opener 
  - Tesla Model 3 :) -> Referral for [Some Free SuperCharging](https://ts.la/andrea74473)
