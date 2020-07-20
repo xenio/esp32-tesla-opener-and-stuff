@@ -11,7 +11,7 @@ Heyyo! This repository contains some stuff:
 
 ### for Tesla Door Opener
  - [433MHz transmitter](https://www.amazon.it/gp/product/B00R2U8OEU) for Tesla Charge Door Opener 
- - Tesla Model 3 :) -> Referral for [https://ts.la/andrea74473](Some Free SuperCharging)
+ - Tesla Model 3 :) -> Referral for [Some Free SuperCharging](https://ts.la/andrea74473)
 
 ### for Weather Station
  - Bresser 5 in 1 [Weather Station](https://amzn.to/2E2WLWl)
