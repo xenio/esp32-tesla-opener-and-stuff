@@ -2,6 +2,7 @@
 #include "./teslaopener/teslaopener.h"
 #include "./wifi/wifi.h"
 #include "./pm25sensor/pm25sensor.h"
+#include "./weatherstation/weatherstation.h"
 #include "secrets.h"
 #include <Arduino.h>
 #include <PubSubClient.h>
@@ -11,9 +12,9 @@ elektronvolt::TeslaOpener *teslaOpener;
 elektronvolt::MQTT *mqtt;
 elektronvolt::WiFi *wifi;
 elektronvolt::PM25Sensor *pm25;
+elektronvolt::WeatherStation *weatherStation;
 
 void setup() {
-    // put your setup code here, to run once:
     Serial.begin(115200);
 
     // init
@@ -21,11 +22,13 @@ void setup() {
     wifi = new elektronvolt::WiFi();
     mqtt = new elektronvolt::MQTT();
     pm25 = new elektronvolt::PM25Sensor();
+    weatherStation = new elektronvolt::WeatherStation();
 
     wifi->setup();
     teslaOpener->setup();
     mqtt->setup();
     pm25->setup();
+    weatherStation->setup();
 
     // Subscribe to mqtt event to open the tesla charge port.
     mqtt->subscribeTo("openChargePort", [](char * _1,uint8_t * _2, int _3) {
@@ -38,6 +41,5 @@ void loop() {
   wifi->loop();
   mqtt->loop();
   pm25->loop();
-
-    // put your main code here, to run repeatedly:
+  weatherStation->loop();
 }

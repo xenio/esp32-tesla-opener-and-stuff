@@ -5,7 +5,7 @@
 namespace elektronvolt
 {
     
-    const uint8_t signalPin = 19; // The number of the pin with the output signal
+    const uint8_t signalPin = 33; // The number of the pin with the output signal
 
     // The signal to send
     const uint16_t pulseWidth = 400;     // Microseconds
