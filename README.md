@@ -43,7 +43,7 @@ I've used an ESP32 WROOM dev so wiring might differ from board to board.
 
 ### for Tesla Door Opener
 
-The 433MHz needs to be connected to ground, +3.3v and data to pin 19.
+The 433MHz needs to be connected to ground, +3.3v and data to pin 33.
 
 ### for PM air quality sensor
 
@@ -53,3 +53,6 @@ Refer to datasheet for its pinout.
  - TX PIN -> ESP32[16]
  - 5v
  - gnd
+
+### for Bresser 5-in-1 Weather Station
+

@@ -1,11 +1,23 @@
 #include "weatherstation.h"
 #include <RadioLib.h>
+#include "../mqtt/mqtt.h"
 
+// CONFIGURATION SECTION
+#define MQTT_TOPIC_BATTERY "weather_station/battery"
+#define MQTT_TOPIC_WIND_AVG "weather_station/wind_avg"
+#define MQTT_TOPIC_WIND_GUST "weather_station/wind_gust"
+#define MQTT_TOPIC_WIND_DIR "weather_station/wind_dir"
+#define MQTT_TOPIC_HUMIDITY "weather_station/humidity"
+#define MQTT_TOPIC_TEMP "weather_station/temp"
+#define MQTT_TOPIC_RAIN "weather_station/rain"
 #define GDO0 35
 #define SCK 18
 #define MISO 19
 #define MOSI 23
 #define SS 5
+// END OF CONFIGURATION SECTION
+
+
 #define RADIOSTATEASSERTOK(STATEVAR)              \
     {                                             \
         if ((STATEVAR) != ERR_NONE) {             \
@@ -14,6 +26,9 @@
             return;                               \
         }                                         \
     }
+
+
+extern elektronvolt::MQTT *mqtt;
 
 namespace elektronvolt {
 
@@ -80,29 +95,28 @@ void WeatherStation::loop() {
     }
     enableInterrupt = false;
     receivedFlag = false;
-    // Serial.println(F("[CC1101] REading incoming transmission ... "));
-    // while(true);
     tryReadAndDecode();
     radio.startReceive();
     enableInterrupt = true;
-    // Serial.println("FINISH");
 }
 
 void WeatherStation::tryReadAndDecode() {
     int state = radio.readData(fullMessage, 27);
     byte *msg = &fullMessage[1];
+    char mqttBuff[10];
     // PrintHex8(msg, 27);
-
-    if (state == ERR_NONE && radio.getLQI() < 50 && fullMessage[0] == 0xd4) {
+    Serial.println(radio.getLQI());
+    if (state == ERR_NONE && fullMessage[0] == 0xd4) {
         // packet was successfully received
-        Serial.println(F("success!"));
         // print RSSI (Received Signal Strength Indicator)
         // First 13 bytes need to match inverse of last 13 bytes
         for (unsigned col = 0; col < 13; ++col) {
             if ((msg[col] ^ msg[col + 13]) != 0xff) {
                 Serial.println(F("Decoding Wrong"));
+                return;
             }
         }
+        Serial.println(F("success!"));
 
         uint16_t sensor_id = msg[14];
 
@@ -126,22 +140,42 @@ void WeatherStation::tryReadAndDecode() {
 
         int battery_ok = ((msg[25] & 0x80) == 0);
 
-        Serial.println("Results: ");
-        Serial.print("Battery: ");
+        Serial.println("\tWeather Results: ");
+        Serial.print("\tBattery: ");
         Serial.println(battery_ok);
-        Serial.print("Wind Speed: ");
+        Serial.print("\tWind Speed: ");
         Serial.println(wind_avg);
-        Serial.print("Wind Gust: ");
+        Serial.print("\tWind Gust: ");
         Serial.println(wind_gust);
-        Serial.print("Temperature: ");
+        Serial.print("\tTemperature: ");
         Serial.println(temperature);
-        Serial.print("Rain: ");
+        Serial.print("\tRain: ");
         Serial.println(rain);
-        Serial.print("Humidity: ");
+        Serial.print("\tHumidity: ");
         Serial.println(humidity);
-    }
-    for (int i = 0; i < 27; i++) {
-        msg[i] = 0;
+
+        // MQTT
+        sprintf(mqttBuff, "%d", battery_ok);
+        mqtt->writeToTopic(MQTT_TOPIC_BATTERY, mqttBuff);
+
+        sprintf(mqttBuff, "%.2f", wind_avg);
+        mqtt->writeToTopic(MQTT_TOPIC_WIND_AVG, mqttBuff);
+
+        sprintf(mqttBuff, "%.2f", wind_gust);
+        mqtt->writeToTopic(MQTT_TOPIC_WIND_GUST, mqttBuff);
+
+        sprintf(mqttBuff, "%.2f", wind_direction_deg);
+        mqtt->writeToTopic(MQTT_TOPIC_WIND_DIR, mqttBuff);
+
+        sprintf(mqttBuff, "%d", humidity);
+        mqtt->writeToTopic(MQTT_TOPIC_HUMIDITY, mqttBuff);
+
+        sprintf(mqttBuff, "%.2f", temperature);
+        mqtt->writeToTopic(MQTT_TOPIC_TEMP, mqttBuff);
+
+        sprintf(mqttBuff, "%.2f", rain);
+        mqtt->writeToTopic(MQTT_TOPIC_RAIN, mqttBuff);
+
     }
 }
 } // namespace elektronvolt
