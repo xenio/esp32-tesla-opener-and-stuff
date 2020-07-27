@@ -56,3 +56,8 @@ Refer to datasheet for its pinout.
 
 ### for Bresser 5-in-1 Weather Station
 
+ - GDO0 -> ESP32[35]
+ - SCK -> ESP32[18]
+ - MISO -> ESP32[19]
+ - MOSI -> ESP32[23]
+ - SS -> ESP32[5]
