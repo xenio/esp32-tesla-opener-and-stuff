@@ -31,10 +31,16 @@ void setup() {
     weatherStation->setup();
 
     // Subscribe to mqtt event to open the tesla charge port.
-    mqtt->subscribeTo("openChargePort", [](char * _1,uint8_t * _2, int _3) {
+    mqtt->subscribeTo("pm-indoor-sensor/openChargePort", [](char * _1,uint8_t * _2, int _3) {
       Serial.println("Asking to open the charge port");
       teslaOpener->openChargePort();
     });
+    mqtt->subscribeTo("pm-indoor-sensor/reboot", [](char * _1,uint8_t * _2, int _3) {
+      Serial.println("Rebooting");
+      delay(500);
+      ESP.restart();
+    });
+    mqtt->writeToTopic("pm-indoor-sensor/hello", "hello");
 }
 
 void loop() {
