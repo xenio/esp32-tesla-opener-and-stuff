@@ -23,7 +23,7 @@ void setup() {
     mqtt = new elektronvolt::MQTT();
     pm25 = new elektronvolt::PM25Sensor();
     weatherStation = new elektronvolt::WeatherStation();
-
+    
     wifi->setup();
     teslaOpener->setup();
     mqtt->setup();

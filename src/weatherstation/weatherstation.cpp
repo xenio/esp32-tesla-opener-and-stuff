@@ -1,8 +1,16 @@
 #include "weatherstation.h"
 #include <RadioLib.h>
 #include "../mqtt/mqtt.h"
+#include <WiFi.h>
+#include "wifi.h"
+#include <time.h>
+
+int timezone = 1;
+int dst = 0;
 
 // CONFIGURATION SECTION
+#define MQTT_TOPIC_IPADDRESS "weather_station/ipaddress"
+#define MQTT_TOPIC_TIME "weather_station/time"
 #define MQTT_TOPIC_BATTERY "weather_station/battery"
 #define MQTT_TOPIC_WIND_AVG "weather_station/wind_avg"
 #define MQTT_TOPIC_WIND_GUST "weather_station/wind_gust"
@@ -16,6 +24,7 @@
 #define MOSI 23
 #define SS 5
 // END OF CONFIGURATION SECTION
+
 
 
 #define RADIOSTATEASSERTOK(STATEVAR)              \
@@ -88,6 +97,9 @@ void WeatherStation::setup() {
 
     // Set interrupt function.
     radio.setGdo0Action(setFlag);
+    
+    configTime(timezone * 3600, dst * 0, "pool.ntp.org", "time.nist.gov");
+
 }
 void WeatherStation::loop() {
     if (!receivedFlag) {
@@ -103,7 +115,7 @@ void WeatherStation::loop() {
 void WeatherStation::tryReadAndDecode() {
     int state = radio.readData(fullMessage, 27);
     byte *msg = &fullMessage[1];
-    char mqttBuff[10];
+    char mqttBuff[30];
     // PrintHex8(msg, 27);
     Serial.println(radio.getLQI());
     if (state == ERR_NONE && fullMessage[0] == 0xd4) {
@@ -153,8 +165,17 @@ void WeatherStation::tryReadAndDecode() {
         Serial.println(rain);
         Serial.print("\tHumidity: ");
         Serial.println(humidity);
+        time_t now = time(nullptr);
+        Serial.print("\tTime: ");
+        Serial.println(ctime(&now));
 
         // MQTT
+        sprintf(mqttBuff, "%s", WiFi.localIP().toString());
+        mqtt->writeToTopic(MQTT_TOPIC_IPADDRESS, mqttBuff);
+
+        sprintf(mqttBuff, "%s", ctime(&now));
+        mqtt->writeToTopic(MQTT_TOPIC_TIME, mqttBuff);
+
         sprintf(mqttBuff, "%d", battery_ok);
         mqtt->writeToTopic(MQTT_TOPIC_BATTERY, mqttBuff);
 
