@@ -1,5 +1,6 @@
 #include "./mqtt/mqtt.h"
 #include "./teslaopener/teslaopener.h"
+#include "./opengate/opengate.h"
 #include "./wifi/wifi.h"
 #include "./pm25sensor/pm25sensor.h"
 #include "./weatherstation/weatherstation.h"
@@ -9,6 +10,7 @@
 #include <WiFi.h>
 
 elektronvolt::TeslaOpener *teslaOpener;
+elektronvolt::OpenGate *openGate;
 elektronvolt::MQTT *mqtt;
 elektronvolt::WiFi *wifi;
 elektronvolt::PM25Sensor *pm25;
@@ -19,6 +21,7 @@ void setup() {
 
     // init
     teslaOpener = new elektronvolt::TeslaOpener();
+    openGate = new elektronvolt::OpenGate();
     wifi = new elektronvolt::WiFi();
     mqtt = new elektronvolt::MQTT();
     pm25 = new elektronvolt::PM25Sensor();
@@ -26,9 +29,16 @@ void setup() {
     
     wifi->setup();
     teslaOpener->setup();
+    openGate->setup();
     mqtt->setup();
     pm25->setup();
     weatherStation->setup();
+
+    // Subscribe to mqtt event to open the tesla charge port.
+    mqtt->subscribeTo("pm-indoor-sensor/openGateTrigger", [](char * _1,uint8_t * _2, int _3) {
+      Serial.println("Asking to open the gate");
+      openGate->openGateTrigger();
+    });
 
     // Subscribe to mqtt event to open the tesla charge port.
     mqtt->subscribeTo("pm-indoor-sensor/openChargePort", [](char * _1,uint8_t * _2, int _3) {
